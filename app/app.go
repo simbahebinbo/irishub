@@ -2,6 +2,7 @@ package app
 
 import (
 	"io"
+	"math/big"
 	"os"
 	"path/filepath"
 
@@ -143,8 +144,6 @@ import (
 
 	srvflags "github.com/evmos/ethermint/server/flags"
 	ethermint "github.com/evmos/ethermint/types"
-	"github.com/evmos/ethermint/x/evm"
-	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/evmos/ethermint/x/evm/vm/geth"
 	"github.com/evmos/ethermint/x/feemarket"
@@ -155,6 +154,8 @@ import (
 	irishubante "github.com/irisnet/irishub/ante"
 	irisappparams "github.com/irisnet/irishub/app/params"
 	"github.com/irisnet/irishub/lite"
+	"github.com/irisnet/irishub/modules/evm"
+	evmkeeper "github.com/irisnet/irishub/modules/evm/keeper"
 	"github.com/irisnet/irishub/modules/guardian"
 	guardiankeeper "github.com/irisnet/irishub/modules/guardian/keeper"
 	guardiantypes "github.com/irisnet/irishub/modules/guardian/types"
@@ -258,8 +259,9 @@ var (
 )
 
 var (
-	_ simapp.App              = (*IrisApp)(nil)
-	_ servertypes.Application = (*IrisApp)(nil)
+	_             simapp.App              = (*IrisApp)(nil)
+	_             servertypes.Application = (*IrisApp)(nil)
+	eip155ChainID                         = big.NewInt(6666)
 )
 
 // IrisApp extends an ABCI application, but with most of its parameters exported.
@@ -743,7 +745,7 @@ func NewIrisApp(
 	app.EvmKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], app.GetSubspace(evmtypes.ModuleName),
 		app.AccountKeeper, app.BankKeeper, &stakingKeeper, app.FeeMarketKeeper,
-		nil, geth.NewEVM, tracer,
+		nil, geth.NewEVM, tracer, eip155ChainID,
 	)
 
 	/****  Module Options ****/
